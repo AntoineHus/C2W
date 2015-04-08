@@ -1,0 +1,787 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This template is for creating an Internet Draft using xml2rfc,
+     which is available here: http://xml.resource.org. -->
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!-- One method to get references from the online citation libraries.
+     There has to be one entity for each item to be referenced. 
+     An alternate method (rfc include) is described in the references. -->
+
+<!ENTITY RFC2629 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2629.xml">
+]>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<!-- used by XSLT processors -->
+<!-- For a complete list and description of processing instructions (PIs), 
+     please see http://xml.resource.org/authoring/README.html. -->
+<!-- Below are generally applicable Processing Instructions (PIs) that most I-Ds might want to use.
+     (Here they are set differently than their defaults in xml2rfc v1.32) -->
+<?rfc strict="yes" ?>
+<!-- give errors regarding ID-nits and DTD validation -->
+<!-- control the table of contents (ToC) -->
+<?rfc toc="yes"?>
+<!-- generate a ToC -->
+<?rfc tocdepth="4"?>
+<!-- the number of levels of subsections in ToC. default: 3 -->
+<!-- control references -->
+<?rfc symrefs="yes"?>
+<!-- use symbolic references tags, i.e, [RFC2119] instead of [1] -->
+<?rfc sortrefs="yes" ?>
+<!-- sort the reference entries alphabetically -->
+<!-- control vertical white space 
+     (using these PIs as follows is recommended by the RFC Editor) -->
+<?rfc compact="yes" ?>
+<!-- do not start each main section on a new page -->
+<?rfc subcompact="yes" ?>
+<!-- do not display copyright and other IETF-related stuff -->
+<?rfc private="(c) GROUP 6, 2014" ?>
+
+<rfc category="info" docName="spec-r302-f14-g6" ipr="trust200902">
+  <!-- category values: std, bcp, info, exp, and historic
+     ipr values: full3667, noModification3667, noDerivatives3667
+     you can add the attributes updates="NNNN" and obsoletes="NNNN" 
+     they will automatically be output with "(if approved)" -->
+
+  <!-- ***** FRONT MATTER ***** -->
+
+  <front>
+    <!-- The abbreviated title is used in the page header - it is only necessary if the 
+         full title is longer than 39 characters -->
+
+    <title abbrev="spec-r302-f14-g6">Group 6: c2w protocol specification proposal version 1 
+    </title>
+
+    <!-- add 'role="editor"' below for the editors if appropriate -->
+
+    
+    <author fullname="Antoine Houssais" initials="A.H."
+            surname="Houssais">
+      <organization></organization>
+
+      <address>
+        <postal>
+          <street></street>
+
+          <!-- Reorder these if your country does things differently -->
+
+          <city></city>
+
+          <region></region>
+
+          <code></code>
+
+          <country></country>
+        </postal>
+
+        
+
+        <email>antoine.houssais@telecom-bretagne.eu</email>
+
+        <!-- uri and facsimile elements may also be added -->
+      </address>
+    </author>
+
+	<author fullname="Aymane Bouzafour" initials="A.B."
+            surname="Bouzafour">
+      <organization></organization>
+
+      <address>
+        <postal>
+          <street></street>
+
+          <!-- Reorder these if your country does things differently -->
+
+          <city></city>
+
+          <region></region>
+
+          <code></code>
+
+          <country></country>
+        </postal>
+
+        
+
+        <email>aymane.bouzafour@telecom-bretagne.eu</email>
+
+        <!-- uri and facsimile elements may also be added -->
+      </address>
+    </author>
+	<author fullname="Manon Woringer" initials="M.W."
+            surname="Woringer">
+      <organization></organization>
+
+      <address>
+        <postal>
+          <street></street>
+
+          <!-- Reorder these if your country does things differently -->
+
+          <city></city>
+
+          <region></region>
+
+          <code></code>
+
+          <country></country>
+        </postal>
+
+        
+
+        <email>manon.woringer@telecom-bretagne.eu</email>
+
+        <!-- uri and facsimile elements may also be added -->
+      </address>
+    </author>
+	<author fullname="Reda Alami" initials="R.A."
+            surname="Alami">
+      <organization></organization>
+
+      <address>
+        <postal>
+          <street></street>
+
+          <!-- Reorder these if your country does things differently -->
+
+          <city></city>
+
+          <region></region>
+
+          <code></code>
+
+          <country></country>
+        </postal>
+
+        
+
+        <email>reda.alami@telecom-bretagne.eu</email>
+
+        <!-- uri and facsimile elements may also be added -->
+      </address>
+    </author>
+
+    <date month="10" year="2014" />
+
+    <!-- If the month and year are both specified and are the current ones, xml2rfc will fill 
+         in the current day for you. If only the current year is specified, xml2rfc will fill 
+	 in the current day and month for you. If the year is not the current one, it is 
+	 necessary to specify at least a month (xml2rfc assumes day="1" if not specified for the 
+	 purpose of calculating the expiry date).  With drafts it is normally sufficient to 
+	 specify just the year. -->
+
+    <keyword>c2w</keyword>
+
+    <!-- Keywords will be incorporated into HTML output
+         files in a meta tag but they have no effect on text or nroff
+         output. If you submit your draft to the RFC Editor, the
+         keywords will be used for the search engine. -->
+
+    <abstract>
+      <t> Protocol specification for the text-based version of the c2w Protocol. The goal of this protocol is to support the application Chat While Watching either with communications between clients and the server in TCP or UDP. The main possibilities offered by the application to the client are watching a movie in a movie room and chatting in a private room. The interface of the application consists in a login window, the "main room" window, "movie room" windows and "private room" windows.
+</t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section title="Introduction">
+      <t>   The aim of the protocol c2w described in this document is to enable clients to chat while visualizing a video from a list of videos available in the server.
+Each client MUST know the IP address or name and the corresponding port number of the server and MUST provide an accurate username.
+The c2w application consists of four possible user interfaces: the login window where the user enters the name (or IP address) and port number of the server as well as his/her username; the main room window which displays a list of all the connected users  to the system and their status ( 'A' if they are available in the main room and 'M' if they are in a movie room); the movie room window which shows the corresponding video, a chat area, a text-input box  and a list of all the clients using that exact room; the private chatroom window which enables the user to chat privately with another available user on the network.
+At any given time the application shows either the login, the main room or the movie room window. It only shows two windows simultaneously when the user happens to be also in a private chatroom. Moreover, a leave button is accessible if the client wants to leave either one of the windows described above with the exception of the login window.
+Clients can use either UDP or TCP to exchange messages with the server. When sending a reply, the server must use the same layer four protocol used by the client for the corresponding request.
+</t>
+
+    </section>
+
+    <section title="Packet format">
+    <t>
+    The header contains : </t> 
+
+		  <t>-The name of the protocole : c2w - 3 bytes</t>   
+		 <t>-The total packet length : in bit - 2 bytes </t> 
+		 <t>-Error control :  </t>
+		 <t><list style="empty"><t> 	-Hash : in bytes - 16 bytes ; calculated on the whole message (see examples below)</t>
+		 <t>	-CRC32 : 4 bytes ; calculated only on the data transmitted</t></list></t>
+		 <t>-The type of the message : 1 byte, will be indicated using a service message number, the terminology is the following one :  </t> 
+	<texttable anchor="table_ex">
+<ttcol align="center">number</ttcol>
+<ttcol align="left">description</ttcol>
+<c>0</c><c>if it is not one of the messages below</c>
+<c>1</c><c>if the message is a connexion message</c>
+<c>2</c><c>if the message is a chat message</c>
+<c>3</c><c>if the server requests the opening of a new chat room window</c>
+<c>4</c><c>if the server requests the opening of a new movie room window</c>
+<c>5</c><c>if the client requests leaving the movie room</c>
+<c>6</c><c>if the server requests leaving the main room</c>
+<c>7</c><c>if the server requests leaving the chat room</c>
+<c>8</c><c>if the client requests getting the movies list</c>
+<c>9</c><c>if the client requests getting the users list</c>
+<c>10</c><c>if the message is a chat aknowledgement message</c>
+<c>11</c><c>if it is a movie room choosing mesage</c>
+<c>12</c><c>if it is an user choosing message</c>
+<c>13</c><c>if it is a chat message sending</c>
+<c>14</c><c>if it is a login accepted message</c>
+<c>15</c><c>if it is a login rejected message</c>
+<c>16</c><c>if it is a message from the server to give the movie list</c>
+<c>17</c><c>if it is a message from the sever to give the users list</c>
+</texttable>		
+<t>-The order : determined using a counter from the first message, used for reordering disordered pieces of messages - 1 byte </t> 
+		 <t>-The fragmentation : 1 if the message is fragmented and so the next fragment needs to be waited / 0 otherwise</t>
+
+        
+
+    <t>
+    <figure align="center" anchor="sample_pkt">
+    <artwork>
+
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+|Field 1=name|Field 2=length|Field 3=hash md5|Field 4 =CRC 32|
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+| Field 5=service message number           | Field 6=counter | 
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+| Field 7=fragments|                                         |
++-+-+-+-+-+-+-+-+-+-                                         |
+|                                                            |
+.                               Message Data                 .
+.                                                            .
+|                                                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-    
+</artwork></figure></t>
+<t> 
+
+       
+    Size of the header : 3 bytes(name) + 2 bytes(length) + 16 bytes(hash md5) + 4 bytes(CRC32) + 1 byte(type) + 1 byte(counter)+ 1 bit(fragment)</t>
+
+    <t> Total size: 217 bit
+    </t>
+    </section>
+<section title="Different kind of messages">
+    <t>Login window : from the login window, the messages are :
+    <list style="empty"><t>CLIENT --> SERVER - IP and port of the server and user-name of the server</t>
+ <t>   SERVER --> CLIENT - login unsuccesful</t>
+  <t>  Login window to main room window : </t>
+ <t>   SERVER --> CLIENT - if login successful, the server displays the main room window and closes the login window</t></list></t>
+
+<t> Main room window : from the main room window, the messages are :
+  <list style="empty"><t>  CLIENT --> SERVER - information requests such as list of all the users, if they are in the main room or in a movie room, list of all the movies</t>
+  <t>  SERVER --> CLIENT - the information</t>
+  <t>  CLIENT --> SERVER - chat message through the text-input box</t>
+  <t>  SERVER --> CLIENT - displays the chat message in the chat area</t>
+  <t>  SERVER --> CLIENT - if a problem occurs : error message</t>
+  <t>  CLIENT --> SERVER - selects a username</t>
+   <t> Main room window to private room window : </t>
+ <t>   SERVER --> CLIENT - if the user is available or in a movie room, the servers displays the private room window</t>
+ <t>   Main room window to movie room window : </t>
+  <t>          CLIENT --> SERVER - selects a movie</t>
+  <t>          SERVER --> CLIENT - the server displays the movie room window and closes the main room window</t>
+  <t>  Main room window to login window :</t>
+  <t>          CLIENT --> SERVER - push the leave button</t>
+  <t>          SERVER --> CLIENT - closes the main room window and displays the login windows + if private chat, the private room window is closed and the other user receives a message "chat terminated"</t></list></t>
+
+  <t>  Movie room window : from each movie rooms, the messages are :
+  <list style="empty"><t>  CLIENT --> SERVER - information requests such as list of all the users in the room</t>
+  <t>  SERVER --> CLIENT - the information</t>
+<t>CLIENT --> SERVER - chat message through the text-input box </t>
+ <t>   SERVER --> CLIENT - displays the chat message in the chat area</t>
+  <t>  SERVER --> CLIENT - if a problem occurs : error message</t>
+  <t>  Movie room window to private room window : </t>
+  <t>          CLIENT --> SERVER - selects a username</t>
+  <t>          SERVER --> CLIENT - the servers displays the private room window</t>
+  <t>  Movie room window to main room window : </t>
+      <t>      CLIENT --> SERVER - push the leave button</t>
+   <t>         SERVER --> CLIENT - closes the movie room window and displays the main room window (+ stops the video flow)</t></list></t>
+
+  <t>  Private room window : from each private rooms, the messages are :
+ <list style="empty"> <t>  CLIENT --> SERVER - chat message through the text-input box </t>
+  <t>  SERVER --> CLIENT - displays the chat message in the chat area</t>
+   <t> SERVER --> CLIENT - if a problem occurs : error message</t>
+  <t>  Private room window closure : </t>
+     <t>       CLIENT --> SERVER - push the leave button</t>
+        <t>    SERVER --> CLIENT - the server closes the private room window + the other user reveives a message "chat terminated"</t></list></t>
+</section>
+<section title="Reliability">
+<t>
+The protocol must be capable of using an unreliable transport like UDP. Consequently, a client will resend a request each time it doesn't receive a response. When the timer goes to its end (2 seconds), it means there have been an error in the transmission. The client resends its request and this time the server will be able to answer.</t>
+</section>
+    <section title="Example scenario">
+<section title="Scenario 1: Connexion to the server">
+    <t>
+    The client fill in the identification form in order to open a new main room window .
+    </t>
+
+    
+	
+<t>
+     
+
+      MSG 1 from the client to the server requesting the sign-in  :
+     
+
+      <list style="empty">
+          <t>  - Name : 'c2w'</t>
+          <t>  - Length : 457</t>
+	  <t>  - Hash md5 : 7662de0224286b8f48423b7fc38b5688</t>
+	  <t>  - CRC32 : 0x59099126</t>
+	  <t>  - Service message number : 2 </t>
+	  <t>  - Counter : 1 </t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data :('Guillaume', 8888, 'localhost')  </t>
+        </list></t>
+  
+       
+       
+     <t>
+
+      MSG 2 from the server stating that the login was accepted :
+     
+
+      <list style="empty">
+          <t>  - Name : 'c2w'</t>
+          <t>  - Length : 217 </t>
+	  <t>  - Hash md5 : 0</t>
+	  <t>  - CRC32 : 0</t>
+	  <t>  - Service message number : 14 </t>
+	  <t>  - Counter : 2 </t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : not used </t>
+        </list></t>
+  
+ 
+      <t>
+      
+      MSG 2bis from the server stating that the login was denied :
+     
+
+      <list style="empty">
+          <t>  - Name : 'c2w'</t>
+          <t>  - Length : 217</t>
+	  <t>  - Hash md5 : 0</t>
+	  <t>  - CRC32 : 0</t>
+	  <t>  - Service message number : 15</t>
+	  <t>  - Counter : 2 </t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : not used </t>
+        </list></t>
+  
+       
+
+    
+    
+	<t> If the informations entered by the client are accurate</t>
+
+	<figure>
+    <artwork>
+       Client                                          Server
+        |                                                   |
+        |  Login message with the server's name (Request)   |
+        |---------------------------------------------------&gt;|
+        |(Service message n°, username, port n°, server name)|
+        |                                                    |
+        |                                                    |
+        |                                                    |          
+        |         Login accepted message (Response)          |
+        |&lt;---------------------------------------------------|
+        |           (Service message n°)                     |  
+        |                                                    |
+        |                                                    |                                                   
+
+       </artwork></figure>
+  
+    
+	<t> If the informations entered by the client are not valid</t>
+        
+	<figure>
+    <artwork>
+		Client                                          Server
+        |                                                    |
+        |  Login message with the server's name (Request)    |
+        |---------------------------------------------------&gt;|
+        |(Service message n°, username, port n°, server name)|
+        |                                                    |
+        |                                                    |
+        |                                                    |          
+        |         Login denied message (Response)            |
+        |&lt;---------------------------------------------------|
+        |           (Service message n°)                     |  
+        |                                                    |
+        |                                                    |  
+        
+    </artwork></figure>
+    
+    </section><!--End of example 1-->
+	<section title="Scenario 2: Client requests getting the movies list and the users list">
+    <t>
+    A client wants to get all the movies and all the users.
+    </t>
+
+    
+	
+<t>
+     The login of the client is accepted, the connection has already been established.</t>
+
+      <t>MSG 1 from the client to get the movies list : </t>
+     
+<t><list style="empty">
+          <t>   - Name : 'c2w'</t>
+          <t>   - Length : 217</t>
+	  <t>   - Hash md5 : 0</t>
+	  <t>   - CRC32 : 0</t>
+	  <t>  - Service message number : 8 </t>
+	  <t>  - Counter : 3 </t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : not used </t>
+</list></t>
+  
+       
+       
+     <t>
+
+      MSG 2 from the server giving the movies list : </t>
+     
+<t><list style="empty">
+          <t>  - Name : 'c2w'</t>
+          <t>  - Length : 217 + length(Message Data)</t>
+	  <t>  - Hash md5 : 0</t>
+	  <t>  - CRC32 : 0</t>
+	  <t>  - Service message number : 16 </t>
+	  <t>  - Counter : 4 </t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : a list of all the available movies names  </t>
+</list></t>
+  
+ 
+      <t>
+      
+      MSG 3 from the client to get the users list :</t>
+     
+<t><list style="empty">
+          <t>  - Name : 'c2w'</t>
+          <t>  - Length : 217</t>
+	  <t>  - Hash md5 : 0</t>
+	  <t>  - CRC32 : 0</t>
+	  <t>  - Service message number : 9 </t>
+	  <t>  - Counter : 5</t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : not used </t>
+</list></t>
+  
+       <t>
+       MSG 4 from the server giving the users list :</t>
+     
+<t><list style="empty">
+          <t>  - Name : 'c2w'</t>
+          <t>  - Length : 217+ length(Message Data)</t>
+	  <t>  - Hash md5 : 0</t>
+	  <t>  - CRC32 : 0</t>
+	  <t>  - Service message number : 17 </t>
+	  <t>  - Counter : 6 </t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : a list of all the connected users names </t>
+</list></t>
+  
+
+    <t>
+    <figure>
+    <artwork>
+
+
+
+       Client                                          Server
+        |                                                   |
+        |            Movies list message (Request)          |
+        |--------------------------------------------------&gt;|
+        |            (Service message n°)                   |
+        |                                                   |
+        |                                                   |
+        |                                                   |          
+        |           Movies list message  (Response)         |
+        |&lt;--------------------------------------------------|
+        |   (Service message n°, all the movie's names)     |  
+        |                                                   |
+        |                                                   |                                                   
+        |												    |
+        |                                                   |
+        |            Users list message (Request)           |
+        |--------------------------------------------------&gt;|
+        |            (Service message n°)                   |
+        |                                                   |
+        |                                                   |
+        |                                                   |          
+        |           Users list message  (Response)          | 
+        |&lt;--------------------------------------------------|
+        |    (Service message n°, all the user's names)     |  
+        |                                                   |
+        |                                                   |                                                   
+        |                                                   |
+        
+        
+    </artwork></figure></t>
+    
+    </section><!--End of example 2-->
+    <section title="Scenario 3: joining a movie room">
+    <t>
+    The client selects a movie among the list of all the movies to join the movie room. His request to the server contains the title of the movie. Then the server selects the movie with its IP adress and the movie room window is displayed.
+    </t>
+<t>
+     The login of the client is accepted, the connection has already been established.</t>
+    
+<t>MSG 1 from the client to the server</t>
+<t><list style="empty">
+          <t>  - Name : 'c2w'</t>
+          <t>  - Length : 361</t>
+	  <t>  - Hash md5 : 89571a933cafa6003c7d0d35c862dc6e</t>
+	  <t>  - CRC32 : aa9e3474</t>
+	  <t>  - Service message number : 11 </t>
+	  <t>  - Counter : 3 </t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : ('Big Buck Bunny')</t>
+</list></t>
+
+<t>MSG 2 from the server to the client</t>
+<t><list style="empty">
+          <t>  - Name : 'c2w'</t>
+          <t>  - Length : 337</t>
+	  <t>  - Hash md5 : 7730acf55e7548ac22b0b3b594737ff5</t>
+	  <t>  - CRC32 : d9af145b</t>
+	  <t>  - Service message number : 4 </t>
+	  <t>  - Counter : 4</t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : (92.108.116.16)</t>
+</list></t>
+<t>
+    <figure>
+   <artwork>
+     Client                                           Server
+        |                                               |
+        |             Message 1 (Request)               |
+        |----------------------------------------------&gt;|
+        |            ('Big Buck Bunny')                 |
+        |                                               |
+        |                                               |
+        |               Message 2 (Response)            |
+        |&lt;----------------------------------------------|
+        |                   (92.108.116.16)             |
+        
+    </artwork></figure></t>
+    
+    </section><!--End of example 3-->
+<section title="Scenario 4: Chat">
+<t> The Client will use the chat </t>
+<t> Scenario 1, the client discusses in private chat </t> 
+
+<t> MSG 1 from the client who sends a chat message request to the server</t>
+<t><list style="empty">
+          <t>  - Name : 'c2w'</t>
+          <t>  - Length : 217</t>
+	  <t>  - Hash md5 : 44fb3408762d685ebbe3b9414fc1f34d </t>
+	  <t>  - CRC32 : 0</t>
+	  <t>  - Service message number : 3</t>
+	  <t>  - Counter : 3</t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : </t>
+        </list>
+</t>
+
+<t> MSG 2 from the client to send a message</t>
+<t><list style="empty">
+          <t>  - Name : ‘c2w’</t>
+          <t>  - Length : 353</t>
+	  <t>  - Hash md5 : 46494b32814de16b660e3b0c0c2af726</t>
+	  <t>  - CRC32 : 94dcecd1</t>
+	  <t>  - Service message number : 12</t>
+	  <t>  - Counter : 4</t>
+	  <t>  - Fragmentation : 0</t>
+	  <t>  - Message data : ('user''bonjour')</t>
+        </list>
+</t>
+<t>MSG 3 from the server to send to the client the message of the other user</t>
+<t><list style="empty">
+          <t>  - Name : 'c2w'</t>
+          <t>  - Length : 353</t>
+	  <t>  - Hash md5 : 3a26f2c07759f302829c73d981e2f3dd</t>
+	  <t>  - CRC32 : 459545ea</t>
+	  <t>  - Service message number : 0</t>
+	  <t>  - Counter : 5</t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : ('user1''salut')</t>
+        </list>
+</t>
+
+<t>MSG 4 from the client to disconnect</t>
+<t><list style="empty">
+          <t>  - Name : 'c2w'</t>
+          <t>  - Length : 217</t>
+	  <t>  - Hash md5 : 9db1d49710145f0fe29f6e26420df4ef</t>
+	  <t>  - CRC32 : 0</t>
+	  <t>  - Service message number : 0</t>
+	  <t>  - Counter : 6</t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : </t>
+        </list>
+</t>
+
+
+
+
+
+
+	<figure>
+    <artwork>
+       Client                                          Server
+       |                                                   |
+       |               Message 1 (Request)                 |
+       |--------------------------------------------------&gt;|
+       |                       ()                          |
+       |                                                   |       
+       |                                                   |
+       |                                                   |          
+       |                 Message 2 (Request)               |
+       |--------------------------------------------------&gt;|
+       |                  ('user''bonjour')                |  
+       |                                                   |
+       |                                                   |  
+	   |                                                   |
+	   |                Message 3 (Response)               |
+	   |&lt;--------------------------------------------------|
+       |                  ('user1''salut')                 |
+       |                                                   |       
+       |                                                   |
+       |                                                   |          
+       |                 Message 2 (Request)               |
+       |--------------------------------------------------&gt;|
+       |                         ()                        |  
+      
+       </artwork></figure>
+  
+   
+
+
+<t> Scenario 2, the client discusses in movie chat </t>
+<t>MSG 1 from the client who sends a movie chat message request to the server</t>
+<t><list style="empty">
+          <t>  - Name : 'c2w'</t>
+          <t>  - Length : 217</t>
+	  <t>  - Hash md5 : 44fb3408762d685ebbe3b9414fc1f34d </t>
+	  <t>  - CRC32 : 0</t>
+	  <t>  - Service message number : 3</t>
+	  <t>  - Counter : 3</t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : </t>
+        </list>
+</t>
+
+<t> MSG 2 from the client to send a message</t>
+<t><list style="empty">
+          <t>  - Name : 'c2w'</t>
+          <t>  - Length : 353</t>
+	  <t>  - Hash md5 : 46494b32814de16b660e3b0c0c2af726</t>
+	  <t>  - CRC32 : 94dcecd1</t>
+	  <t>  - Service message number : 12</t>
+	  <t>  - Counter : 4</t>
+	  <t>  - Fragmentation : 0</t>
+	  <t>  - Message data : ('user''bonjour')</t>
+        </list>
+</t>
+<t>MSG 3 from the server to send to the client the the message of another user</t>
+<t><list style="empty">
+          <t>  - Name : 'c2w'</t>
+          <t>  - Length : 353</t>
+	  <t>  - Hash md5 : 3a26f2c07759f302829c73d981e2f3dd</t>
+	  <t>  - CRC32 : 459545ea</t>
+	  <t>  - Service message number : 0</t>
+	  <t>  - Counter : 5</t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : ('user1''salut')</t>
+        </list>
+</t>
+
+
+
+
+<figure>
+    <artwork>
+       Client                                          Server
+        |                                                   |
+        |             Client sent a message                 |
+        |--------------------------------------------------&gt;|
+        |                      ()                           |
+        |                                                   |
+        |                                                   |
+        |                                                   |          
+        |         Server sent a message ()                  |
+        |&lt;--------------------------------------------------|
+        |                      ()                           |  
+        |                                                   |
+        |                                                   |                                                   
+
+       </artwork></figure>
+
+<t> Scenario 3, the client discusses in main chat </t> 
+<t><list style="empty">
+          <t>  - Name : ‘c2w’</t>
+          <t>  - Length : 217</t>
+	  <t>  - Hash md5 : 44fb3408762d685ebbe3b9414fc1f34d </t>
+	  <t>  - CRC32 : 0</t>
+	  <t>  - Service message number : 3</t>
+	  <t>  - Counter : 3</t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : </t>
+        </list>
+</t>
+
+<t> Message 2: the Client sent a message</t>
+<t><list style="empty">
+          <t>  - Name : ‘c2w’</t>
+          <t>  - Length : 353</t>
+	  <t>  - Hash md5 : 46494b32814de16b660e3b0c0c2af726</t>
+	  <t>  - CRC32 : 94dcecd1</t>
+	  <t>  - Service message number : 12</t>
+	  <t>  - Counter : 4</t>
+	  <t>  - Fragmentation : 0</t>
+	  <t>  - Message data : (‘user’’bonjour’)</t>
+        </list>
+</t>
+<t>Message 3: the Server sent to the client the other’s message</t>
+<t><list style="empty">
+          <t>  - Name : ‘c2w’</t>
+          <t>  - Length : 353</t>
+	  <t>  - Hash md5 : 3a26f2c07759f302829c73d981e2f3dd</t>
+	  <t>  - CRC32 : 459545ea</t>
+	  <t>  - Service message number : 0</t>
+	  <t>  - Counter : 5</t>
+	  <t>  - Fragmentation : 0 </t>
+	  <t>  - Message data : (‘user1’’salut’)</t>
+        </list>
+</t>
+
+<figure>
+    <artwork>
+       Client                                          Server
+        |                                                   |
+        |             Client sent a message                 |
+        |--------------------------------------------------&gt;|
+        |                      ()                           |
+        |                                                   |
+        |                                                   |
+        |                                                   |          
+        |         Server sent a message ()                  |
+        |&lt;--------------------------------------------------|
+        |                      ()                           |  
+        |                                                   |
+        |                                                   |                                                   
+
+       </artwork></figure>
+    </section><!--End of example 4-->
+    </section><!--End of examples-->
+
+    <section title="Conclusion">
+        <t>
+ This protocol ensures a decent level of security since it features the cryptographic hash function : Hash md5 used to guarantee data integrity. Besides, in order to resolve the frequent reliability issues, an error-detecting code (CRC32) is integrated as well as a counter field which will be used for the sake of preserving the sent messages order. Moreover, a fragmentation field will be used to reinforce both the reliability and the efficiency criteria. In fact, the user is free to split a lengthened message into several shorter parts so that he could gain more speed and performance, this field will enable the receiver to realize that he will have to receive other messages in order to reassemble the whole message.
+
+Furthermore, this protocol can be used over unreliable environments like UDP and is also compatible with TCP.
+
+Hence, the performance analysis of this protocol shows that it is ought to be able to encompass all the requirements of the c2w application and to be flexible and adjustable for future improvements. 
+        </t>
+    </section>
+
+    </middle>
+
+</rfc>

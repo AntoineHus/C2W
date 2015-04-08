@@ -1,0 +1,784 @@
+
+
+
+
+Network Working Group                                        A. Houssais
+Internet-Draft
+Intended status: Informational                              A. Bouzafour
+Expires: April 15, 2015
+                                                             M. Woringer
+
+                                                                R. Alami
+
+                                                                 10 2014
+
+
+         Group 6: c2w protocol specification proposal version 1
+                            spec-r302-f14-g6
+
+Abstract
+
+   Protocol specification for the text-based version of the c2w
+   Protocol.  The goal of this protocol is to support the application
+   Chat While Watching either with communications between clients and
+   the server in TCP or UDP.  The main possibilities offered by the
+   application to the client are watching a movie in a movie room and
+   chatting in a private room.  The interface of the application
+   consists in a login window, the "main room" window, "movie room"
+   windows and "private room" windows.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at http://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on April 15, 2015.
+
+Copyright Notice
+
+   Copyright (c) 2014 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+
+
+
+
+Houssais, et al.         Expires April 15, 2015                 [Page 1]
+
+Internet-Draft              spec-r302-f14-g6                     10 2014
+
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (http://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Packet format . . . . . . . . . . . . . . . . . . . . . . . .   3
+   3.  Different kind of messages  . . . . . . . . . . . . . . . . .   4
+   4.  Reliability . . . . . . . . . . . . . . . . . . . . . . . . .   5
+   5.  Example scenario  . . . . . . . . . . . . . . . . . . . . . .   6
+     5.1.  Scenario 1: Connexion to the server . . . . . . . . . . .   6
+     5.2.  Scenario 2: Client requests getting the movies list and
+           the users list  . . . . . . . . . . . . . . . . . . . . .   7
+     5.3.  Scenario 3: joining a movie room  . . . . . . . . . . . .   9
+     5.4.  Scenario 4: Chat  . . . . . . . . . . . . . . . . . . . .  10
+   6.  Conclusion  . . . . . . . . . . . . . . . . . . . . . . . . .  13
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  14
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  14
+
+1.  Introduction
+
+   The aim of the protocol c2w described in this document is to enable
+   clients to chat while visualizing a video from a list of videos
+   available in the server.  Each client MUST know the IP address or
+   name and the corresponding port number of the server and MUST provide
+   an accurate username.  The c2w application consists of four possible
+   user interfaces: the login window where the user enters the name (or
+   IP address) and port number of the server as well as his/her
+   username; the main room window which displays a list of all the
+   connected users to the system and their status ( 'A' if they are
+   available in the main room and 'M' if they are in a movie room); the
+   movie room window which shows the corresponding video, a chat area, a
+   text-input box and a list of all the clients using that exact room;
+   the private chatroom window which enables the user to chat privately
+   with another available user on the network.  At any given time the
+   application shows either the login, the main room or the movie room
+   window.  It only shows two windows simultaneously when the user
+   happens to be also in a private chatroom.  Moreover, a leave button
+   is accessible if the client wants to leave either one of the windows
+   described above with the exception of the login window.  Clients can
+   use either UDP or TCP to exchange messages with the server.  When
+
+
+
+Houssais, et al.         Expires April 15, 2015                 [Page 2]
+
+Internet-Draft              spec-r302-f14-g6                     10 2014
+
+
+   sending a reply, the server must use the same layer four protocol
+   used by the client for the corresponding request.
+
+2.  Packet format
+
+   The header contains :
+
+   -The name of the protocole : c2w - 3 bytes
+
+   -The total packet length : in bit - 2 bytes
+
+   -Error control :
+
+      -Hash : in bytes - 16 bytes ; calculated on the whole message (see
+      examples below)
+      -CRC32 : 4 bytes ; calculated only on the data transmitted
+
+   -The type of the message : 1 byte, will be indicated using a service
+   message number, the terminology is the following one :
+
+   +------------+------------------------------------------------------+
+   |   number   | description                                          |
+   +------------+------------------------------------------------------+
+   |     0      | if it is not one of the messages below               |
+   |     1      | if the message is a connexion message                |
+   |     2      | if the message is a chat message                     |
+   |     3      | if the server requests the opening of a new chat     |
+   |            | room window                                          |
+   |     4      | if the server requests the opening of a new movie    |
+   |            | room window                                          |
+   |     5      | if the client requests leaving the movie room        |
+   |     6      | if the server requests leaving the main room         |
+   |     7      | if the server requests leaving the chat room         |
+   |     8      | if the client requests getting the movies list       |
+   |     9      | if the client requests getting the users list        |
+   |     10     | if the message is a chat aknowledgement message      |
+   |     11     | if it is a movie room choosing mesage                |
+   |     12     | if it is an user choosing message                    |
+   |     13     | if it is a chat message sending                      |
+   |     14     | if it is a login accepted message                    |
+   |     15     | if it is a login rejected message                    |
+   |     16     | if it is a message from the server to give the movie |
+   |            | list                                                 |
+   |     17     | if it is a message from the sever to give the users  |
+   |            | list                                                 |
+   +------------+------------------------------------------------------+
+
+                                  Table 1
+
+
+
+Houssais, et al.         Expires April 15, 2015                 [Page 3]
+
+Internet-Draft              spec-r302-f14-g6                     10 2014
+
+
+   -The order : determined using a counter from the first message, used
+   for reordering disordered pieces of messages - 1 byte
+
+   -The fragmentation : 1 if the message is fragmented and so the next
+   fragment needs to be waited / 0 otherwise
+
+
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+      |Field 1=name|Field 2=length|Field 3=hash md5|Field 4 =CRC 32|
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+      | Field 5=service message number           | Field 6=counter |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+      | Field 7=fragments|                                         |
+      +-+-+-+-+-+-+-+-+-+-                                         |
+      |                                                            |
+      .                               Message Data                 .
+      .                                                            .
+      |                                                            |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+
+                                 Figure 1
+
+   Size of the header : 3 bytes(name) + 2 bytes(length) + 16 bytes(hash
+   md5) + 4 bytes(CRC32) + 1 byte(type) + 1 byte(counter)+ 1
+   bit(fragment)
+
+   Total size: 217 bit
+
+3.  Different kind of messages
+
+   Login window : from the login window, the messages are :
+
+      CLIENT --> SERVER - IP and port of the server and user-name of the
+      server
+      SERVER --> CLIENT - login unsuccesful
+      Login window to main room window :
+      SERVER --> CLIENT - if login successful, the server displays the
+      main room window and closes the login window
+
+   Main room window : from the main room window, the messages are :
+
+      CLIENT --> SERVER - information requests such as list of all the
+      users, if they are in the main room or in a movie room, list of
+      all the movies
+      SERVER --> CLIENT - the information
+      CLIENT --> SERVER - chat message through the text-input box
+      SERVER --> CLIENT - displays the chat message in the chat area
+      SERVER --> CLIENT - if a problem occurs : error message
+
+
+
+Houssais, et al.         Expires April 15, 2015                 [Page 4]
+
+Internet-Draft              spec-r302-f14-g6                     10 2014
+
+
+      CLIENT --> SERVER - selects a username
+      Main room window to private room window :
+      SERVER --> CLIENT - if the user is available or in a movie room,
+      the servers displays the private room window
+      Main room window to movie room window :
+      CLIENT --> SERVER - selects a movie
+      SERVER --> CLIENT - the server displays the movie room window and
+      closes the main room window
+      Main room window to login window :
+      CLIENT --> SERVER - push the leave button
+      SERVER --> CLIENT - closes the main room window and displays the
+      login windows + if private chat, the private room window is closed
+      and the other user receives a message "chat terminated"
+
+   Movie room window : from each movie rooms, the messages are :
+
+      CLIENT --> SERVER - information requests such as list of all the
+      users in the room
+      SERVER --> CLIENT - the information
+      CLIENT --> SERVER - chat message through the text-input box
+      SERVER --> CLIENT - displays the chat message in the chat area
+      SERVER --> CLIENT - if a problem occurs : error message
+      Movie room window to private room window :
+      CLIENT --> SERVER - selects a username
+      SERVER --> CLIENT - the servers displays the private room window
+      Movie room window to main room window :
+      CLIENT --> SERVER - push the leave button
+      SERVER --> CLIENT - closes the movie room window and displays the
+      main room window (+ stops the video flow)
+
+   Private room window : from each private rooms, the messages are :
+
+      CLIENT --> SERVER - chat message through the text-input box
+      SERVER --> CLIENT - displays the chat message in the chat area
+      SERVER --> CLIENT - if a problem occurs : error message
+      Private room window closure :
+      CLIENT --> SERVER - push the leave button
+      SERVER --> CLIENT - the server closes the private room window +
+      the other user reveives a message "chat terminated"
+
+4.  Reliability
+
+   The protocol must be capable of using an unreliable transport like
+   UDP.  Consequently, a client will resend a request each time it
+   doesn't receive a response.  When the timer goes to its end (2
+   seconds), it means there have been an error in the transmission.  The
+   client resends its request and this time the server will be able to
+   answer.
+
+
+
+Houssais, et al.         Expires April 15, 2015                 [Page 5]
+
+Internet-Draft              spec-r302-f14-g6                     10 2014
+
+
+5.  Example scenario
+
+5.1.  Scenario 1: Connexion to the server
+
+   The client fill in the identification form in order to open a new
+   main room window .
+
+   MSG 1 from the client to the server requesting the sign-in :
+
+      - Name : 'c2w'
+      - Length : 457
+      - Hash md5 : 7662de0224286b8f48423b7fc38b5688
+      - CRC32 : 0x59099126
+      - Service message number : 2
+      - Counter : 1
+      - Fragmentation : 0
+      - Message data :('Guillaume', 8888, 'localhost')
+
+   MSG 2 from the server stating that the login was accepted :
+
+      - Name : 'c2w'
+      - Length : 217
+      - Hash md5 : 0
+      - CRC32 : 0
+      - Service message number : 14
+      - Counter : 2
+      - Fragmentation : 0
+      - Message data : not used
+
+   MSG 2bis from the server stating that the login was denied :
+
+      - Name : 'c2w'
+      - Length : 217
+      - Hash md5 : 0
+      - CRC32 : 0
+      - Service message number : 15
+      - Counter : 2
+      - Fragmentation : 0
+      - Message data : not used
+
+   If the informations entered by the client are accurate
+
+          Client                                          Server
+           |                                                   |
+           |  Login message with the server's name (Request)   |
+           |--------------------------------------------------->|
+           |(Service message no, username, port no, server name)|
+           |                                                    |
+
+
+
+Houssais, et al.         Expires April 15, 2015                 [Page 6]
+
+Internet-Draft              spec-r302-f14-g6                     10 2014
+
+
+           |                                                    |
+           |                                                    |
+           |         Login accepted message (Response)          |
+           |<---------------------------------------------------|
+           |           (Service message no)                     |
+           |                                                    |
+           |                                                    |
+
+
+   If the informations entered by the client are not valid
+
+           Client                                          Server
+           |                                                    |
+           |  Login message with the server's name (Request)    |
+           |--------------------------------------------------->|
+           |(Service message no, username, port no, server name)|
+           |                                                    |
+           |                                                    |
+           |                                                    |
+           |         Login denied message (Response)            |
+           |<---------------------------------------------------|
+           |           (Service message no)                     |
+           |                                                    |
+           |                                                    |
+
+
+5.2.  Scenario 2: Client requests getting the movies list and the users
+      list
+
+   A client wants to get all the movies and all the users.
+
+   The login of the client is accepted, the connection has already been
+   established.
+
+   MSG 1 from the client to get the movies list :
+
+      - Name : 'c2w'
+      - Length : 217
+      - Hash md5 : 0
+      - CRC32 : 0
+      - Service message number : 8
+      - Counter : 3
+      - Fragmentation : 0
+      - Message data : not used
+
+   MSG 2 from the server giving the movies list :
+
+      - Name : 'c2w'
+
+
+
+Houssais, et al.         Expires April 15, 2015                 [Page 7]
+
+Internet-Draft              spec-r302-f14-g6                     10 2014
+
+
+      - Length : 217 + length(Message Data)
+      - Hash md5 : 0
+      - CRC32 : 0
+      - Service message number : 16
+      - Counter : 4
+      - Fragmentation : 0
+      - Message data : a list of all the available movies names
+
+   MSG 3 from the client to get the users list :
+
+      - Name : 'c2w'
+      - Length : 217
+      - Hash md5 : 0
+      - CRC32 : 0
+      - Service message number : 9
+      - Counter : 5
+      - Fragmentation : 0
+      - Message data : not used
+
+   MSG 4 from the server giving the users list :
+
+      - Name : 'c2w'
+      - Length : 217+ length(Message Data)
+      - Hash md5 : 0
+      - CRC32 : 0
+      - Service message number : 17
+      - Counter : 6
+      - Fragmentation : 0
+      - Message data : a list of all the connected users names
+
+
+
+
+          Client                                          Server
+           |                                                   |
+           |            Movies list message (Request)          |
+           |-------------------------------------------------->|
+           |            (Service message no)                   |
+           |                                                   |
+           |                                                   |
+           |                                                   |
+           |           Movies list message  (Response)         |
+           |<--------------------------------------------------|
+           |   (Service message no, all the movie's names)     |
+           |                                                   |
+           |                                                   |
+           |                                                   |
+           |                                                   |
+
+
+
+Houssais, et al.         Expires April 15, 2015                 [Page 8]
+
+Internet-Draft              spec-r302-f14-g6                     10 2014
+
+
+           |            Users list message (Request)           |
+           |-------------------------------------------------->|
+           |            (Service message no)                   |
+           |                                                   |
+           |                                                   |
+           |                                                   |
+           |           Users list message  (Response)          |
+           |<--------------------------------------------------|
+           |    (Service message no, all the user's names)     |
+           |                                                   |
+           |                                                   |
+           |                                                   |
+
+
+
+5.3.  Scenario 3: joining a movie room
+
+   The client selects a movie among the list of all the movies to join
+   the movie room.  His request to the server contains the title of the
+   movie.  Then the server selects the movie with its IP adress and the
+   movie room window is displayed.
+
+   The login of the client is accepted, the connection has already been
+   established.
+
+   MSG 1 from the client to the server
+
+      - Name : 'c2w'
+      - Length : 361
+      - Hash md5 : 89571a933cafa6003c7d0d35c862dc6e
+      - CRC32 : aa9e3474
+      - Service message number : 11
+      - Counter : 3
+      - Fragmentation : 0
+      - Message data : ('Big Buck Bunny')
+
+   MSG 2 from the server to the client
+
+      - Name : 'c2w'
+      - Length : 337
+      - Hash md5 : 7730acf55e7548ac22b0b3b594737ff5
+      - CRC32 : d9af145b
+      - Service message number : 4
+      - Counter : 4
+      - Fragmentation : 0
+      - Message data : (92.108.116.16)
+
+
+
+
+
+Houssais, et al.         Expires April 15, 2015                 [Page 9]
+
+Internet-Draft              spec-r302-f14-g6                     10 2014
+
+
+        Client                                           Server
+           |                                               |
+           |             Message 1 (Request)               |
+           |---------------------------------------------->|
+           |            ('Big Buck Bunny')                 |
+           |                                               |
+           |                                               |
+           |               Message 2 (Response)            |
+           |<----------------------------------------------|
+           |                   (92.108.116.16)             |
+
+
+5.4.  Scenario 4: Chat
+
+   The Client will use the chat
+
+   Scenario 1, the client discusses in private chat
+
+   MSG 1 from the client who sends a chat message request to the server
+
+      - Name : 'c2w'
+      - Length : 217
+      - Hash md5 : 44fb3408762d685ebbe3b9414fc1f34d
+      - CRC32 : 0
+      - Service message number : 3
+      - Counter : 3
+      - Fragmentation : 0
+      - Message data :
+
+   MSG 2 from the client to send a message
+
+      - Name : 'c2w'
+      - Length : 353
+      - Hash md5 : 46494b32814de16b660e3b0c0c2af726
+      - CRC32 : 94dcecd1
+      - Service message number : 12
+      - Counter : 4
+      - Fragmentation : 0
+      - Message data : ('user''bonjour')
+
+   MSG 3 from the server to send to the client the message of the other
+   user
+
+      - Name : 'c2w'
+      - Length : 353
+      - Hash md5 : 3a26f2c07759f302829c73d981e2f3dd
+      - CRC32 : 459545ea
+      - Service message number : 0
+
+
+
+Houssais, et al.         Expires April 15, 2015                [Page 10]
+
+Internet-Draft              spec-r302-f14-g6                     10 2014
+
+
+      - Counter : 5
+      - Fragmentation : 0
+      - Message data : ('user1''salut')
+
+   MSG 4 from the client to disconnect
+
+      - Name : 'c2w'
+      - Length : 217
+      - Hash md5 : 9db1d49710145f0fe29f6e26420df4ef
+      - CRC32 : 0
+      - Service message number : 0
+      - Counter : 6
+      - Fragmentation : 0
+      - Message data :
+
+          Client                                          Server
+          |                                                   |
+          |               Message 1 (Request)                 |
+          |-------------------------------------------------->|
+          |                       ()                          |
+          |                                                   |
+          |                                                   |
+          |                                                   |
+          |                 Message 2 (Request)               |
+          |-------------------------------------------------->|
+          |                  ('user''bonjour')                |
+          |                                                   |
+          |                                                   |
+          |                                                   |
+          |                Message 3 (Response)               |
+          |<--------------------------------------------------|
+          |                  ('user1''salut')                 |
+          |                                                   |
+          |                                                   |
+          |                                                   |
+          |                 Message 2 (Request)               |
+          |-------------------------------------------------->|
+          |                         ()                        |
+
+
+   Scenario 2, the client discusses in movie chat
+
+   MSG 1 from the client who sends a movie chat message request to the
+   server
+
+      - Name : 'c2w'
+      - Length : 217
+      - Hash md5 : 44fb3408762d685ebbe3b9414fc1f34d
+
+
+
+Houssais, et al.         Expires April 15, 2015                [Page 11]
+
+Internet-Draft              spec-r302-f14-g6                     10 2014
+
+
+      - CRC32 : 0
+      - Service message number : 3
+      - Counter : 3
+      - Fragmentation : 0
+      - Message data :
+
+   MSG 2 from the client to send a message
+
+      - Name : 'c2w'
+      - Length : 353
+      - Hash md5 : 46494b32814de16b660e3b0c0c2af726
+      - CRC32 : 94dcecd1
+      - Service message number : 12
+      - Counter : 4
+      - Fragmentation : 0
+      - Message data : ('user''bonjour')
+
+   MSG 3 from the server to send to the client the the message of
+   another user
+
+      - Name : 'c2w'
+      - Length : 353
+      - Hash md5 : 3a26f2c07759f302829c73d981e2f3dd
+      - CRC32 : 459545ea
+      - Service message number : 0
+      - Counter : 5
+      - Fragmentation : 0
+      - Message data : ('user1''salut')
+
+          Client                                          Server
+           |                                                   |
+           |             Client sent a message                 |
+           |-------------------------------------------------->|
+           |                      ()                           |
+           |                                                   |
+           |                                                   |
+           |                                                   |
+           |         Server sent a message ()                  |
+           |<--------------------------------------------------|
+           |                      ()                           |
+           |                                                   |
+           |                                                   |
+
+
+   Scenario 3, the client discusses in main chat
+
+      - Name : 'c2w'
+      - Length : 217
+
+
+
+Houssais, et al.         Expires April 15, 2015                [Page 12]
+
+Internet-Draft              spec-r302-f14-g6                     10 2014
+
+
+      - Hash md5 : 44fb3408762d685ebbe3b9414fc1f34d
+      - CRC32 : 0
+      - Service message number : 3
+      - Counter : 3
+      - Fragmentation : 0
+      - Message data :
+
+   Message 2: the Client sent a message
+
+      - Name : 'c2w'
+      - Length : 353
+      - Hash md5 : 46494b32814de16b660e3b0c0c2af726
+      - CRC32 : 94dcecd1
+      - Service message number : 12
+      - Counter : 4
+      - Fragmentation : 0
+      - Message data : ('user''bonjour')
+
+   Message 3: the Server sent to the client the other's message
+
+      - Name : 'c2w'
+      - Length : 353
+      - Hash md5 : 3a26f2c07759f302829c73d981e2f3dd
+      - CRC32 : 459545ea
+      - Service message number : 0
+      - Counter : 5
+      - Fragmentation : 0
+      - Message data : ('user1''salut')
+
+          Client                                          Server
+           |                                                   |
+           |             Client sent a message                 |
+           |-------------------------------------------------->|
+           |                      ()                           |
+           |                                                   |
+           |                                                   |
+           |                                                   |
+           |         Server sent a message ()                  |
+           |<--------------------------------------------------|
+           |                      ()                           |
+           |                                                   |
+           |                                                   |
+
+
+6.  Conclusion
+
+   This protocol ensures a decent level of security since it features
+   the cryptographic hash function : Hash md5 used to guarantee data
+
+
+
+Houssais, et al.         Expires April 15, 2015                [Page 13]
+
+Internet-Draft              spec-r302-f14-g6                     10 2014
+
+
+   integrity.  Besides, in order to resolve the frequent reliability
+   issues, an error-detecting code (CRC32) is integrated as well as a
+   counter field which will be used for the sake of preserving the sent
+   messages order.  Moreover, a fragmentation field will be used to
+   reinforce both the reliability and the efficiency criteria.  In fact,
+   the user is free to split a lengthened message into several shorter
+   parts so that he could gain more speed and performance, this field
+   will enable the receiver to realize that he will have to receive
+   other messages in order to reassemble the whole message.
+   Furthermore, this protocol can be used over unreliable environments
+   like UDP and is also compatible with TCP.  Hence, the performance
+   analysis of this protocol shows that it is ought to be able to
+   encompass all the requirements of the c2w application and to be
+   flexible and adjustable for future improvements.
+
+7.  References
+
+Authors' Addresses
+
+   Antoine Houssais
+
+   Email: antoine.houssais@telecom-bretagne.eu
+
+
+   Aymane Bouzafour
+
+   Email: aymane.bouzafour@telecom-bretagne.eu
+
+
+   Manon Woringer
+
+   Email: manon.woringer@telecom-bretagne.eu
+
+
+   Reda Alami
+
+   Email: reda.alami@telecom-bretagne.eu
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Houssais, et al.         Expires April 15, 2015                [Page 14]
